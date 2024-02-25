@@ -1,0 +1,22 @@
+{
+  "name": "airemory_cloud_service",
+  "version": "1.0.0",
+  "description": "REST API hosted on Google App Engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node RestAPI.js"
+  },
+  "author": "George Morales",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/cloud-sql-connector": "^1.2.3",
+    "express": "^4.18.2",
+    "knex": "^3.1.0",
+    "mysql2": "^3.9.1",
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": "20.11.0"
+  }
+}
