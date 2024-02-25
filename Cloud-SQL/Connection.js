@@ -14,9 +14,9 @@ async function GoogleCloudSQLInstance(databaseName) {
 
 		// TODO new project so new config options
 		const clientOptions = await connector.getOptions({
-			instanceConnectionName : "saikawa-web-development:us-central1:air-emory-test-repo",
-			authType : AuthTypes.IAM,
-			//ipType : "PUBLIC"
+			instanceConnectionName: "saikawa-web-development:us-central1:air-emory-test-repo",
+			ipType: IpAddressTypes.PUBLIC,
+			authType: AuthTypes.IAM
 		});
 
 
