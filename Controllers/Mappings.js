@@ -13,7 +13,6 @@ async function getRawAQ(request, response) {
     const { database, closeSQLConnection } = await GoogleCloudSQLInstance();
 
     const sensorId = request.query.sensorId;
-    console.log(sensorId);
 
     const table = RAW_DB.concat(".").concat(sensorId);
 
