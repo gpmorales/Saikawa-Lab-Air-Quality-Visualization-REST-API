@@ -67,7 +67,7 @@ async function getRawAQ(request, response) {
 async function getCorrectedAQ(request, response) {
   try {
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(undefined, DB_USER);
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(undefined, DB_USER + "a");
 
     // Extract query parameters
     const sensorId = request.query.sensorId;
