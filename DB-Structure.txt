@@ -1,0 +1,24 @@
+2 Databases -> Raw and Corrected
+
+Raw ---> Each Table corresponds to a sensor
+
+	 Raw table -> ()
+         
+
+
+Corrected Hourly ---> Each table corresponds to a unique sensor
+	
+	Corrected Hrly Table -> (dayhour, corrected_PM25)
+
+
+Corrected Daily -->
+	
+	Corrected Daily Table -> (day, corrected_PM25)
+
+
+
+
+**** Query-Param ****
+
+
+
