@@ -171,6 +171,8 @@ async function appendCorrectedAQ(request, response) {
 
     const iamUser = request.headers["db_user"];
 
+    console.log(iamUser);
+    console.log(DB_USER);
     if (iamUser == undefined || iamUser != DB_USER) {
       return response.status(500).json({ msg: "Dont have the permissions to access this data" });
     }
