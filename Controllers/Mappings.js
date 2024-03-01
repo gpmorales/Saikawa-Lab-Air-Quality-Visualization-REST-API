@@ -1,8 +1,8 @@
 // RESTful Controller
 const { GoogleCloudSQLInstance } = require("../Cloud-SQL/Connection");
 
-const DB_USER = process.env.db_password || "internal-user"; // REMOVE TODO
-
+// GLOBAL VARS & ENUMS
+const DB_USER = process.env.db_password || undefined;
 const BIAS_CORRECTED_HOURLY_DB = "bias_corrected_hourly";
 const BIAS_CORRECTED_DAILY_DB = "bias_corrected_daily";
 const RAW_DB = "raw";
@@ -184,7 +184,7 @@ async function appendCorrectedAQ(request, response) {
     const iamUser = request.headers["db_user"];
     console.log("IAM USEr for post : " + iamUser);
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(DB_NAME, iamUser);
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(DB_NAME, "bob");
 
     const table = DB_NAME.concat(".").concat(sensorId);
 
