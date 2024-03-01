@@ -116,7 +116,7 @@ async function appendRawAQ(request, response) {
     const iamUser = request.headers["db_user"];
 
     if (iamUser == undefined || iamUser != DB_USER) {
-      return response.status(500).json({ msg: "Dont have the permissions to access this data" });
+      return response.status(500).json({ msg: "Permission to insert data DENIED" });
     }
 
     const { database, closeSQLConnection } = await GoogleCloudSQLInstance(RAW_DB);
@@ -171,9 +171,8 @@ async function appendCorrectedAQ(request, response) {
 
     const iamUser = request.headers["db_user"];
 
-    console.log(DB_USER);
     if (iamUser == undefined || iamUser != DB_USER) {
-      return response.status(500).json({ msg: "Dont have the permissions to access this data" });
+      return response.status(500).json({ msg: "Permission to insert data DENIED" });
     }
 
     console.log("Appending bias-corrected air quality data... \n");
