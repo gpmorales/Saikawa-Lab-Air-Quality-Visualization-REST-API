@@ -27,7 +27,7 @@ async function GoogleCloudSQLInstance(databaseName) {
 				...clientOptions,
 				user : "internal-user",
 				database : databaseName,
-				timezone : 'UTC+4'
+				timezone : "+04:00"
 			}
 		});
 
