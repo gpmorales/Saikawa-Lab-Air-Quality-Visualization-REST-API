@@ -25,7 +25,7 @@ const PARTICLE_TPYE= {
 async function getRawAQ(request, response) {
   try {
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(undefined, DB_USER);
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance();
 
     // Extract query parameters
     const sensorId = request.query.sensorId;
@@ -67,7 +67,7 @@ async function getRawAQ(request, response) {
 async function getCorrectedAQ(request, response) {
   try {
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(undefined, DB_USER);
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance();
 
     // Extract query parameters
     const sensorId = request.query.sensorId;
@@ -115,7 +115,11 @@ async function appendRawAQ(request, response) {
 
     const iamUser = request.headers["db_user"];
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(RAW_DB, iamUser);
+    if (iamUser == undefined || iamUser != DB_USER) {
+      return response.status(500).json({ msg: "Dont have the permissions to access this data" });
+    }
+
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(RAW_DB);
 
     // pull table name from request
     const sensorId = request.body.sensorId
@@ -165,6 +169,12 @@ async function appendRawAQ(request, response) {
 async function appendCorrectedAQ(request, response) {
   try {
 
+    const iamUser = request.headers["db_user"];
+
+    if (iamUser == undefined || iamUser != DB_USER) {
+      return response.status(500).json({ msg: "Dont have the permissions to access this data" });
+    }
+
     console.log("Appending bias-corrected air quality data... \n");
 
     // Pull parameters from request
@@ -181,10 +191,7 @@ async function appendCorrectedAQ(request, response) {
       return response.status(500).json({ msg : "Invalid format type for AQ data, can only be Hourly or Daily" });
     }
 
-    const iamUser = request.headers["db_user"];
-    console.log("IAM USEr for post : " + iamUser);
-
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(DB_NAME, "bob");
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(DB_NAME);
 
     const table = DB_NAME.concat(".").concat(sensorId);
 
@@ -225,4 +232,3 @@ async function appendCorrectedAQ(request, response) {
 
 
 module.exports = { getRawAQ, getCorrectedAQ, appendRawAQ, appendCorrectedAQ };
-
