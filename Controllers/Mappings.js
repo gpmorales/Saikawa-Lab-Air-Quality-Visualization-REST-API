@@ -2,7 +2,7 @@
 const { GoogleCloudSQLInstance } = require("../Cloud-SQL/Connection");
 
 // GLOBAL VARS & ENUMS
-const DB_USER = process.env.db_password || undefined;
+const DB_USER = process.env.DB || undefined;
 const BIAS_CORRECTED_HOURLY_DB = "bias_corrected_hourly";
 const BIAS_CORRECTED_DAILY_DB = "bias_corrected_daily";
 const RAW_DB = "raw";
@@ -171,7 +171,6 @@ async function appendCorrectedAQ(request, response) {
 
     const iamUser = request.headers["db_user"];
 
-    console.log(iamUser);
     console.log(DB_USER);
     if (iamUser == undefined || iamUser != DB_USER) {
       return response.status(500).json({ msg: "Dont have the permissions to access this data" });
