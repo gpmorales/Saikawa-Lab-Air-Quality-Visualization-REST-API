@@ -1,6 +1,7 @@
 // RESTful Controller
 const { GoogleCloudSQLInstance } = require("../Cloud-SQL/Connection");
 
+const DB_USER = process.env.db_password || undefined;
 const BIAS_CORRECTED_HOURLY_DB = "bias_corrected_hourly";
 const BIAS_CORRECTED_DAILY_DB = "bias_corrected_daily";
 const RAW_DB = "raw";
@@ -23,7 +24,7 @@ const PARTICLE_TPYE= {
 async function getRawAQ(request, response) {
   try {
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance();
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(undefined, db_password);
 
     // Extract query parameters
     const sensorId = request.query.sensorId;
@@ -65,7 +66,7 @@ async function getRawAQ(request, response) {
 async function getCorrectedAQ(request, response) {
   try {
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance();
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(undefined, db_password);
 
     // Extract query parameters
     const sensorId = request.query.sensorId;
@@ -111,8 +112,9 @@ async function appendRawAQ(request, response) {
 
     console.log("Appending raw air quality data...\n");
 
+    const iamUser = request.headers["db_password"];
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(RAW_DB);
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(RAW_DB, iamUser);
 
     // pull table name from request
     const sensorId = request.body.sensorId
@@ -178,7 +180,9 @@ async function appendCorrectedAQ(request, response) {
       return response.status(500).json({ msg : "Invalid format type for AQ data, can only be Hourly or Daily" });
     }
 
-    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(DB_NAME);
+    const iamUser = request.headers["db_password"];
+
+    const { database, closeSQLConnection } = await GoogleCloudSQLInstance(DB_NAME, iamUser);
 
     const table = DB_NAME.concat(".").concat(sensorId);
 
