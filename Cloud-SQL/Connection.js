@@ -25,9 +25,9 @@ async function GoogleCloudSQLInstance(databaseName) {
 			client: "mysql2",
 			connection: {
 				...clientOptions,
-				user : "internal-user",
+				user : "internal-user", 
 				database : databaseName,
-				timezone : "+04:00"
+				timezone : "+00:00"
 			}
 		});
 

@@ -2,26 +2,19 @@
 const { GoogleCloudSQLInstance } = require("../Cloud-SQL/Connection");
 
 // GLOBAL VARS & ENUMS
-const DB_USER = process.env.DB || undefined;
+const DB_USER = process.env.DB || undefined; 
 const BIAS_CORRECTED_HOURLY_DB = "bias_corrected_hourly";
 const BIAS_CORRECTED_DAILY_DB = "bias_corrected_daily";
 const RAW_DB = "raw";
 
 
-const FORMAT_TYPE = {
-  DAILY : ["daily", "DAILY", "Daily"],
-  HOURLY : ["hourly", "HOURLY", "Hourly"]
-};
-
-
-const PARTICLE_TPYE= {
-  PM10: ["pm10", "PM10"],
-  PM25 : ["pm25", "PM25"]
-};
+const PARTICLE_TYPE= { PM1: ["pm1", "PM1"], PM10: ["pm10", "PM10"], PM25 : ["pm25", "PM25"] };
+const FORMAT_TYPE = { DAILY : ["daily", "DAILY", "Daily"], HOURLY : ["hourly", "HOURLY", "Hourly"] };
 
 
 
-// TBD 
+
+// TODO ----> WORKS
 async function getRawAQ(request, response) {
   try {
 
@@ -29,7 +22,6 @@ async function getRawAQ(request, response) {
 
     // Extract query parameters
     const sensorId = request.query.sensorId;
-    const timeFormat = request.query.timeFormat;
     const particleSize = request.query.particleSize
     const startDate = request.query.startDate;
     const endDate = request.query.endDate;
@@ -39,15 +31,17 @@ async function getRawAQ(request, response) {
     let result;
     
     // Create QUERY from parameters
-    if (FORMAT_TYPE.DAILY.includes(timeFormat)) { // TBD : If DAILY CHOOSE?????
-      result = await database(table).select("*") .where('day', '>=', startDate).andWhere('day', '<=', endDate);
+    if (PARTICLE_TYPE.PM1.includes(particleSize)) { 
+      result = await database(table).select("datetime", "pm1").where("datetime", ">=", startDate).andWhere("datetime", "<=", endDate);
     } 
-
-    else if (FORMAT_TYPE.HOURLY.includes(timeFormat)) { // TBD : DAILY FORMAT MUST be "YYYY-MM-DD HH:MM:SS" (WORKS!)
-    }
-
+    else if (PARTICLE_TYPE.PM10.includes(particleSize)) { 
+      result = await database(table).select("datetime", "pm10").where("datetime", ">=", startDate).andWhere("datetime", "<=", endDate);
+    } 
+    else if (PARTICLE_TYPE.PM25.includes(particleSize)) { 
+      result = await database(table).select("datetime", "pm25").where("datetime", ">=", startDate).andWhere("datetime", "<=", endDate);
+    } 
     else {
-      return response.status(500).json({ msg : "Invalid format type for AQ data, can only be Hourly or Daily" });
+      return response.status(500).json({ msg : "Invalid particle type for AQ data, can only be Hourly or Daily" });
     }
 
 
@@ -90,8 +84,9 @@ async function getCorrectedAQ(request, response) {
     }
 
     else {
-      return response.status(500).json({ msg : "Invalid format type for AQ data, can only be Hourly or Daily" });
+      return response.status(500).json({ msg : "Invalid time query for AQ data, can only be Hourly or Daily" });
     }
+
 
     await closeSQLConnection();
 
@@ -107,49 +102,39 @@ async function getCorrectedAQ(request, response) {
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-// TBD
+// TODO ----> WORKS
 async function appendRawAQ(request, response) {
   try {
 
-    console.log("Appending raw air quality data...\n");
-
     const iamUser = request.headers["db_user"];
 
-    if (iamUser == undefined || iamUser != DB_USER) {
-      return response.status(500).json({ msg: "Permission to insert data DENIED" });
+    if (iamUser == undefined || iamUser != DB_USER) { 
+      return response.status(401).json({ msg: "Request to insert data has been denied ..." });
     }
 
     const { database, closeSQLConnection } = await GoogleCloudSQLInstance(RAW_DB);
 
     // pull table name from request
-    const sensorId = request.body.sensorId
+    const sensorId = request.query.sensorId
 
     const table = RAW_DB.concat(".").concat(sensorId);
 
     const tableExists = await database.schema.hasTable(sensorId);
 
-
     if (!tableExists) {
-
-      console.log("Table doesnt exist")
-      
-      // TBD SCHEMA
-      
-      // ['pm1', 'pm10', 'pm25', 'sn', 'timestamp', 'timestamp_local', 'url', 'geo.lat', 'geo.lon', 'met.rh', 'met.temp', 'model.pm.pm1', 'model.pm.pm10', 'model.pm.pm25'
-
       await database.schema.createTable(table, table => {
-        table.timestamp("date").defaultTo(database.fn.now())
-        table.string("pm10");
-        table.string("pm25");
-        table.double("humdity");
-        table.double("temperature");
+        table.datetime("datetime").defaultTo(database.fn.now()) // YYYY-MM-DD HH:MM:SS
+        table.double("pm1");
+        table.double("pm10");
+        table.double("pm25");
       });
     }
 
 
-
     // Insert new data and close db connection
     await database(table).insert(request.body);
+
+    console.log("Appending raw air quality data...\n");
 
     await closeSQLConnection();
 
@@ -171,11 +156,10 @@ async function appendCorrectedAQ(request, response) {
 
     const iamUser = request.headers["db_user"];
 
-    if (iamUser == undefined || iamUser != DB_USER) {
-      return response.status(500).json({ msg: "Permission to insert data DENIED" });
+    if (iamUser == undefined || iamUser != DB_USER) { 
+      return response.status(401).json({ msg: "Request to insert data has been denied ..." });
     }
 
-    console.log("Appending bias-corrected air quality data... \n");
 
     // Pull parameters from request
     const sensorId = request.query.sensorId;
@@ -201,14 +185,14 @@ async function appendCorrectedAQ(request, response) {
       if (FORMAT_TYPE.DAILY.includes(timeFormat)) {
         await database.schema.createTable(table, table => {
           table.date("day").defaultTo('2000-01-01'); // YYYY-MM-DD
-          table.double("corrected_PM25");
-          // table.double("corrected_PM10"); // TBD
+          table.double("corrected_PM25d");
+          // table.double("corrected_PM10d"); // TBD
         });
       } else {
         await database.schema.createTable(table, table => {
           table.datetime("dayhour").defaultTo(database.fn.now()) // YYYY-MM-DD HH:MM:SS
-          table.double("corrected_PM25");
-          // table.double("corrected_PM10"); // TBD
+          table.double("corrected_PM25h");
+          // table.double("corrected_PM10h"); // TBD
         });
       }
     }
@@ -216,6 +200,8 @@ async function appendCorrectedAQ(request, response) {
 
     // Insert new data and close db connection
     await database(table).insert(request.body);
+
+    console.log("Appending bias-corrected air quality data... \n");
 
     await closeSQLConnection();
 
