@@ -202,6 +202,8 @@ async function appendCorrectedAQ(request, response) {
     }
 
     console.log("REQ bod" + request.body);
+    console.log("REQ bod" + request.body[0]);
+    console.log("REQ bod" + request.body[0].day);
 
     // Insert new data and close db connection
     await database(table).insert(request.body);
