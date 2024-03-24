@@ -55,7 +55,8 @@ Router.route("/raw-aq").get(getRawAQ);
 
 
 
-/**
+
+ /**
  * @swagger
  * /raw-aq:
  *   post:
@@ -67,7 +68,13 @@ Router.route("/raw-aq").get(getRawAQ);
  *         required: true
  *         schema:
  *           type: string
- *         description: The sensor ID to append data for
+ *         description: The sensor ID to append data for.
+ *       - in: header
+ *         name: db_user
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The database user key required for authentication.
  *     requestBody:
  *       required: true
  *       content:
@@ -161,6 +168,12 @@ Router.route("/corrected-aq").get(getCorrectedAQ);
  *         schema:
  *           type: string
  *         description: The format of the data being inserted (Daily or Hourly)
+ *       - in: header
+ *         name: db_user
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The database user key required for authentication.
  *     requestBody:
  *       required: true
  *       content:
