@@ -154,6 +154,8 @@ async function appendRawAQ(request, response) {
 async function appendCorrectedAQ(request, response) {
   try {
 
+    console.log("HITTT");
+
     const iamUser = request.headers["db_user"];
 
     if (iamUser == undefined || iamUser != DB_USER) { 
