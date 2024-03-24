@@ -154,8 +154,6 @@ async function appendRawAQ(request, response) {
 async function appendCorrectedAQ(request, response) {
   try {
 
-    console.log("HITTT");
-
     const iamUser = request.headers["db_user"];
 
     if (iamUser == undefined || iamUser != DB_USER) { 
@@ -181,7 +179,11 @@ async function appendCorrectedAQ(request, response) {
 
     const table = DB_NAME.concat(".").concat(sensorId);
 
+    console.log(table)
+
     const tableExists = await database.schema.hasTable(sensorId);
+
+    console.log(tableExists)
 
     if (!tableExists) {
       if (FORMAT_TYPE.DAILY.includes(timeFormat)) {
@@ -199,7 +201,7 @@ async function appendCorrectedAQ(request, response) {
       }
     }
 
-    console.log(request.body);
+    console.log("REQ bod" + request.body);
 
     // Insert new data and close db connection
     await database(table).insert(request.body);
