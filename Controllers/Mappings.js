@@ -197,9 +197,11 @@ async function appendCorrectedAQ(request, response) {
       }
     }
 
+    console.log(request.body);
 
     // Insert new data and close db connection
     await database(table).insert(request.body);
+
 
     console.log("Appending bias-corrected air quality data... \n");
 
