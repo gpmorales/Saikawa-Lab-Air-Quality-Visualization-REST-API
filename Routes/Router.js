@@ -2,14 +2,16 @@
 const express = require("express");
 const Router = express.Router();
 
-
-const { getRawAQ, appendRawAQ, getCorrectedAQ, appendCorrectedAQ } = require("../Controllers/Mappings");
-
+const {
+  getRawAQ,
+  appendRawAQ,
+  getCorrectedAQ,
+  appendCorrectedAQ,
+} = require("../Controllers/API");
 
 // NOTE router is a middleware that allows you to define routes for your application
 // It allows you to define different routes for different HTTP methods (such as GET, POST, etc.) and handle them separately
 // The router can also handle URL parameters, query strings, and other request details, and then pass them to the appropriate route handler
-
 
 /**
  * @swagger
@@ -44,13 +46,9 @@ const { getRawAQ, appendRawAQ, getCorrectedAQ, appendCorrectedAQ } = require("..
  *       500:
  *         description: Error message
  */
-Router.route("/raw-aq").get(getRawAQ); 
+Router.route("/raw-aq").get(getRawAQ);
 
-
-
-
-
- /**
+/**
  * @swagger
  * /raw-aq:
  *   post:
@@ -95,10 +93,7 @@ Router.route("/raw-aq").get(getRawAQ);
  *       500:
  *         description: Error message
  */
-Router.route("/raw-aq").post(appendRawAQ); 
-
-
-
+Router.route("/raw-aq").post(appendRawAQ);
 
 /**
  * @swagger
@@ -140,8 +135,6 @@ Router.route("/raw-aq").post(appendRawAQ);
  *         description: Error message
  */
 Router.route("/corrected-aq").get(getCorrectedAQ);
-
-
 
 /**
  * @swagger
@@ -202,8 +195,6 @@ Router.route("/corrected-aq").get(getCorrectedAQ);
  *       500:
  *         description: Error message
  */
-Router.route("/corrected-aq").post(appendCorrectedAQ); 
-
-
+Router.route("/corrected-aq").post(appendCorrectedAQ);
 
 module.exports = Router;
