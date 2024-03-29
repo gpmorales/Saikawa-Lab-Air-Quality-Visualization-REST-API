@@ -22,28 +22,13 @@ async function getRawAQ(request, response) {
 
     // Extract query parameters
     const sensorId = request.query.sensorId;
-    const particleSize = request.query.particleSize
     const startDate = request.query.startDate;
     const endDate = request.query.endDate;
 
     // ['pm1', 'pm10', 'pm25', 'sn', 'timestamp', 'timestamp_local', 'url', 'geo.lat', 'geo.lon', 'met.rh', 'met.temp', 'model.pm.pm1', 'model.pm.pm10', 'model.pm.pm25'
     const table = RAW_DB.concat(".").concat(sensorId);
-    let result;
     
-    // Create QUERY from parameters
-    if (PARTICLE_TYPE.PM1.includes(particleSize)) { 
-      result = await database(table).select("datetime", "pm1").where("datetime", ">=", startDate).andWhere("datetime", "<=", endDate);
-    } 
-    else if (PARTICLE_TYPE.PM10.includes(particleSize)) { 
-      result = await database(table).select("datetime", "pm10").where("datetime", ">=", startDate).andWhere("datetime", "<=", endDate);
-    } 
-    else if (PARTICLE_TYPE.PM25.includes(particleSize)) { 
-      result = await database(table).select("datetime", "pm25").where("datetime", ">=", startDate).andWhere("datetime", "<=", endDate);
-    } 
-    else {
-      return response.status(500).json({ msg : "Invalid particle type for AQ data, can only be Hourly or Daily" });
-    }
-
+    const result = await database(table).select("*").where("time", ">=", startDate).andWhere("time", "<=", endDate);
 
     await closeSQLConnection();
 
@@ -87,7 +72,6 @@ async function getCorrectedAQ(request, response) {
       return response.status(500).json({ msg : "Invalid time query for AQ data, can only be Hourly or Daily" });
     }
 
-
     await closeSQLConnection();
 
     response.status(200).json(result);
@@ -123,13 +107,16 @@ async function appendRawAQ(request, response) {
 
     if (!tableExists) {
       await database.schema.createTable(table, table => {
-        table.datetime("datetime").defaultTo(database.fn.now()) // YYYY-MM-DD HH:MM:SS
+        table.datetime("time").defaultTo(database.fn.now()) // YYYY-MM-DD HH:MM:SS
         table.double("pm1");
         table.double("pm10");
         table.double("pm25");
+        table.double("rh");
+        table.double("temp");
+        table.double("lat");
+        table.double("lon");
       });
     }
-
 
     // Insert new data and close db connection
     await database(table).insert(request.body);
@@ -179,18 +166,15 @@ async function appendCorrectedAQ(request, response) {
 
     const table = DB_NAME.concat(".").concat(sensorId);
 
-    console.log(table)
 
     const tableExists = await database.schema.hasTable(sensorId);
-
-    console.log(tableExists)
 
     if (!tableExists) {
       if (FORMAT_TYPE.DAILY.includes(timeFormat)) {
         await database.schema.createTable(table, table => {
           table.date("day").defaultTo('2000-01-01'); // YYYY-MM-DD
           table.double("corrected_PM25d");
-          // table.double("corrected_PM10d"); // TBD
+          // table.double("corrected_PM10d"); //TBD
         });
       } else {
         await database.schema.createTable(table, table => {
@@ -201,13 +185,8 @@ async function appendCorrectedAQ(request, response) {
       }
     }
 
-    console.log("REQ bod" + request.body);
-    console.log("REQ bod" + request.body[0]);
-    console.log("REQ bod" + request.body[0].day);
-
     // Insert new data and close db connection
     await database(table).insert(request.body);
-
 
     console.log("Appending bias-corrected air quality data... \n");
 

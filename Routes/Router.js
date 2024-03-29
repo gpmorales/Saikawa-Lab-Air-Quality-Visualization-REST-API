@@ -25,12 +25,6 @@ const { getRawAQ, appendRawAQ, getCorrectedAQ, appendCorrectedAQ } = require("..
  *           type: string
  *         description: The sensor ID to fetch data for
  *       - in: query
- *         name: particleSize
- *         required: true
- *         schema:
- *           type: string
- *         description: The particle size to filter by (PM1, PM10, PM25)
- *       - in: query
  *         name: startDate
  *         required: true
  *         schema:
